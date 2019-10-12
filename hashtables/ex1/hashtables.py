@@ -44,7 +44,13 @@ def hash_table_insert(hash_table, key, value):
         current_pair = last_pair.next
 
     if current_pair is not None:
-        current_pair.value = value
+        while current_pair is not None:
+            last_pair = current_pair
+            current_pair = last_pair.next
+        new_pair = LinkedPair(key, value)
+        new_pair.next = hash_table.storage[index]
+        hash_table.storage[index] = new_pair
+
     else:
         new_pair = LinkedPair(key, value)
         new_pair.next = hash_table.storage[index]

@@ -23,12 +23,21 @@ def get_indices_of_item_weights(weights, length, limit):
 
     if len(prelim__answer) == 2:
         prelim__answer.sort(reverse=True)
-        return (prelim__answer[0, prelim__answer[1])
+        return (prelim__answer[0], prelim__answer[1])
 
+    for n in range(0, len(t) - 1):
+        if t[n] !=None:
+            search_num = limit - t[n].key
+            answer = hash_table_retrieve(ht, search_num)
+            if answer != None:
+                prelim__answer.append(answer)
 
+    if len(prelim__answer) == 2:
+        prelim__answer.sort(reverse=True)
+        return (prelim__answer[0], prelim__answer[1])
 
-
-    return None
+    else:
+        return None
 
 
 def print_answer(answer):
