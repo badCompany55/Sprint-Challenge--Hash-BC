@@ -9,6 +9,10 @@ from timeit import default_timer as timer
 
 import random
 
+import json
+
+coins_mined = 0
+id = str(uuid4()).replace("-", "")
 
 def proof_of_work(last_proof):
     """
@@ -25,9 +29,14 @@ def proof_of_work(last_proof):
 
     print("Searching for next proof")
     proof = 0
-    #  TODO: Your code here
 
+    last_proof_str = f"{last_proof}".encode()
+    last_hash = hashlib.sha256(last_proof_str).hexdigest()
+
+    while valid_proof(last_hash, proof) is False:
+        proof += 1
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
+    print(proof)
     return proof
 
 
@@ -35,12 +44,56 @@ def valid_proof(last_hash, proof):
     """
     Validates the Proof:  Multi-ouroborus:  Do the last six characters of
     the hash of the last proof match the first six characters of the proof?
-
     IE:  last_hash: ...AE9123456, new hash 123456888...
     """
 
-    # TODO: Your code here!
-    pass
+    guess = f'{proof}'.encode()
+    guess_hash = hashlib.sha256(guess).hexdigest()
+
+    if str(last_hash[-6:]) == guess_hash[:6]:
+        return True
+    return False
+
+# def proof_of_work(last_proof):
+#     """
+#     Multi-Ouroboros of Work Algorithm
+#     - Find a number p' such that the last six digits of hash(p) are equal
+#     to the first six digits of hash(p')
+#     - IE:  last_hash: ...AE9123456, new hash 123456888...
+#     - p is the previous proof, and p' is the new proof
+#     - Use the same method to generate SHA-256 hashes as the examples in class
+#     - Note:  We are adding the hash of the last proof to a number/nonce for the new proof
+#     """
+#
+#     start = timer()
+#
+#     print("Searching for next proof")
+#     proof = 0
+#
+#     last_hash_str = f'{last_proof}'.encode()
+#     last_hash = hashlib.sha256(last_hash_str).hexdigest()
+#
+#     while valid_proof(last_hash, proof) is False:
+#         proof += 1
+#
+#     print("Proof found: " + str(proof) + " in " + str(timer() - start))
+#     return proof
+#
+#
+# def valid_proof(last_hash, proof):
+#     """
+#     Validates the Proof:  Multi-ouroborus:  Do the last six characters of
+#     the hash of the last proof match the first six characters of the proof?
+#
+#     IE:  last_hash: ...AE9123456, new hash 123456888...
+#     """
+#     guess = f'{proof}'.encode()
+#     guess_hash = hashlib.sha256(guess).hexdigest()
+#
+#     if last_hash[:2] == guess_hash[2:]:
+#         return True
+#     else:
+#         return False
 
 
 if __name__ == '__main__':
@@ -66,6 +119,7 @@ if __name__ == '__main__':
         # Get the last proof from the server
         r = requests.get(url=node + "/last_proof")
         data = r.json()
+        print(data)
         new_proof = proof_of_work(data.get('proof'))
 
         post_data = {"proof": new_proof,
@@ -73,6 +127,7 @@ if __name__ == '__main__':
 
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
+        print(data)
         if data.get('message') == 'New Block Forged':
             coins_mined += 1
             print("Total coins mined: " + str(coins_mined))
